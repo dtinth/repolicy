@@ -1,23 +1,19 @@
 import glob from 'glob'
 
-class RepolicyContext {
-  addPolicy(name: string) {
-    console.log(`- ${name}`)
-  }
-  use = (...plugins: RepolicyPlugin[]) => {
-    plugins.forEach((plugin) => {
-      plugin(this)
-    })
-  }
-}
-
-type RepolicyPlugin = (context: RepolicyContext) => void
-type RepolicyScript = (context: RepolicyContext) => void
+import {
+  RepolicyScript,
+  RepolicyPlugin,
+  RepolicyContext,
+} from './RepolicyScript'
+import { Repo } from './Repo'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+import { JSONEditor } from './JSONEditor'
+import * as _ from 'lodash-es'
+import { PropertyPath } from 'lodash'
 
 const script: RepolicyScript = ({ use }) => {
   use(managedFiles('skeleton'))
-  use(directory('etc'))
-
   use(
     unwantedFile(
       // Replaced with changeset.
@@ -99,20 +95,11 @@ const script: RepolicyScript = ({ use }) => {
  */
 function managedFiles(templatePath: string): RepolicyPlugin {
   return (context) => {
-    const files = glob.sync('**', { cwd: templatePath, dot: true })
+    const files = glob.sync('**', { cwd: templatePath, dot: true, nodir: true })
     for (const file of files) {
-      context.addPolicy(`Managed file "${file}"`)
-    }
-  }
-}
-
-/**
- * Ensure that a directory exists.
- */
-function directory(...projectPaths: string[]): RepolicyPlugin {
-  return (context) => {
-    for (const projectPath of projectPaths) {
-      context.addPolicy(`Directory "${projectPath}"`)
+      context.addPolicy(`Managed file "${file}"`, async (repo) => {
+        repo.write(file, readFileSync(resolve(templatePath, file)))
+      })
     }
   }
 }
@@ -123,7 +110,9 @@ function directory(...projectPaths: string[]): RepolicyPlugin {
 function unwantedFile(...projectPaths: string[]): RepolicyPlugin {
   return (context) => {
     for (const projectPath of projectPaths) {
-      context.addPolicy(`Unwanted file "${projectPath}"`)
+      context.addPolicy(`Unwanted file "${projectPath}"`, async (repo) => {
+        repo.delete(projectPath)
+      })
     }
   }
 }
@@ -137,9 +126,16 @@ function packageDevDependencies(
   return (context) => {
     for (const [name, version] of Object.entries(data)) {
       if (version === null) {
-        context.addPolicy(`Unwanted devDependency "${name}"`)
+        context.addPolicy(`Unwanted devDependency "${name}"`, async (repo) => {
+          _updatePackageJson(repo, ['devDependencies', name], () => undefined)
+        })
       } else {
-        context.addPolicy(`DevDependency "${name}" version "${version}"`)
+        context.addPolicy(
+          `DevDependency "${name}" version "${version}"`,
+          async (repo) => {
+            _updatePackageJson(repo, ['devDependencies', name], () => version)
+          },
+        )
       }
     }
   }
@@ -152,9 +148,13 @@ function packageScripts(data: Record<string, string | null>): RepolicyPlugin {
   return (context) => {
     for (const [name, value] of Object.entries(data)) {
       if (value === null) {
-        context.addPolicy(`Unwanted script "${name}"`)
+        context.addPolicy(`Unwanted script "${name}"`, async (repo) => {
+          _updatePackageJson(repo, ['scripts', name], () => undefined)
+        })
       } else {
-        context.addPolicy(`Managed package script "${name}"`)
+        context.addPolicy(`Managed package script "${name}"`, async (repo) => {
+          _updatePackageJson(repo, ['scripts', name], () => value)
+        })
       }
     }
   }
@@ -165,16 +165,44 @@ function packageScripts(data: Record<string, string | null>): RepolicyPlugin {
  */
 function packageJsonPolicy(
   policyName: string,
-  field: string,
+  field: PropertyPath,
   expected: (value: any, p: any) => any,
 ): RepolicyPlugin {
   return (context) => {
-    context.addPolicy(policyName)
+    context.addPolicy(policyName, async (repo) => {
+      _updatePackageJson(repo, field, expected)
+    })
   }
 }
 
-script(new RepolicyContext())
+function _updatePackageJson(
+  repo: Repo,
+  field: PropertyPath,
+  expected: (value: any, p: any) => any,
+) {
+  const editor = new JSONEditor(repo)
+  const pkg = editor.read('package.json')
+  const value = _.get(pkg, field)
+  const expectedValue = expected(value, pkg)
+  editor.edit('package.json', (p) => {
+    if (expectedValue === undefined) {
+      _.unset(p, field)
+    } else {
+      _.set(p, field, expectedValue)
+    }
+  })
+}
+
+async function main() {
+  const ctx = new RepolicyContext(
+    new Repo('/Users/dtinth/Projects/react-performance-coach'),
+  )
+  script(ctx)
+  await ctx.run()
+}
 
 function unscopedPackageName(p: any) {
   return (p.name || '').split('/').pop()
 }
+
+main()
