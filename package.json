@@ -3,6 +3,7 @@
   "dependencies": {
     "@types/node": "^18.7.14",
     "chalk": "^5.0.1",
+    "git-remote-origin-url": "^4.0.0",
     "glob": "^8.0.3",
     "lodash-es": "^4.17.21",
     "tsx": "^3.9.0",

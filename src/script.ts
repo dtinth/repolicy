@@ -8,9 +8,9 @@ import * as _ from 'lodash-es'
 import { PropertyPath } from 'lodash'
 import { isExecutable } from './isExecutable'
 
-export type RepolicyScript = (context: RepolicyContext) => void
+export type RepolicyScript = (context: RepolicyContext) => Promise<void>
 
-export const script: RepolicyScript = ({ use }) => {
+export const script: RepolicyScript = async ({ use }) => {
   use(managedFiles('skeleton'))
   use(
     unwantedFile(

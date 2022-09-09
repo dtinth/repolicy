@@ -15,7 +15,7 @@ async function main() {
     throw new Error('repo path required')
   }
   const ctx = new RepolicyContext(new Repo(repoPath))
-  script(ctx)
+  await script(ctx)
   await ctx.run()
   if (values.flush) {
     await ctx.flush()

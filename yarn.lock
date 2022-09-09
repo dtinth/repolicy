@@ -608,6 +608,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"git-remote-origin-url@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "git-remote-origin-url@npm:4.0.0"
+  dependencies:
+    gitconfiglocal: ^2.1.0
+  checksum: b667babf07c24e1e74d2cbb4f1cd996f8ccb0140e9958fa43eb65f2882117f902cf398e02744e5804ab2e8d72919133823b03ca18b3fae8b9c3932e6ec7526ba
+  languageName: node
+  linkType: hard
+
+"gitconfiglocal@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "gitconfiglocal@npm:2.1.0"
+  dependencies:
+    ini: ^1.3.2
+  checksum: 4b4b44d992a6abf2900eec8cfe960dc36e0d3c2467d20ec69e0a0f13b6b7645b926daa004df42f94c34ad28a58529cf2522fa0bf261e4e7b95958fb451dcedda
+  languageName: node
+  linkType: hard
+
 "glob@npm:^7.1.3, glob@npm:^7.1.4":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
@@ -730,6 +748,13 @@ __metadata:
   version: 2.0.4
   resolution: "inherits@npm:2.0.4"
   checksum: 4a48a733847879d6cf6691860a6b1e3f0f4754176e4d71494c41f3475553768b10f84b5ce1d40fbd0e34e6bfbb864ee35858ad4dd2cf31e02fc4a154b724d7f1
+  languageName: node
+  linkType: hard
+
+"ini@npm:^1.3.2":
+  version: 1.3.8
+  resolution: "ini@npm:1.3.8"
+  checksum: dfd98b0ca3a4fc1e323e38a6c8eb8936e31a97a918d3b377649ea15bdb15d481207a0dda1021efbd86b464cae29a0d33c1d7dcaf6c5672bee17fa849bc50a1b3
   languageName: node
   linkType: hard
 
@@ -1048,6 +1073,7 @@ __metadata:
     "@types/lodash-es": ^4.17.6
     "@types/node": ^18.7.14
     chalk: ^5.0.1
+    git-remote-origin-url: ^4.0.0
     glob: ^8.0.3
     lodash-es: ^4.17.21
     tsx: ^3.9.0
