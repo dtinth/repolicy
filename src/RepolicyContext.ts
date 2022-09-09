@@ -26,9 +26,9 @@ export class RepolicyContext {
         const oldVersion = this.project.version
         await policy.f(this.project)
         if (oldVersion !== this.project.version) {
-          console.log(`[${chalk.green('done')}] ${policy.name}`)
+          console.log(`[${chalk.yellow('update')}] ${policy.name}`)
         } else {
-          console.log(`[${chalk.cyan('noop')}] ${policy.name}`)
+          console.log(`[${chalk.green('ok')}] ${policy.name}`)
         }
       } else {
         console.log(`[${chalk.magenta('todo')}] ${policy.name}`)
@@ -38,4 +38,3 @@ export class RepolicyContext {
 }
 
 export type RepolicyPlugin = (context: RepolicyContext) => void
-export type RepolicyScript = (context: RepolicyContext) => void
