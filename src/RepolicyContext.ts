@@ -10,7 +10,7 @@ class Policy {
 type PolicyFunction = (repo: Repo) => Promise<void>
 
 export class RepolicyContext {
-  constructor(public project: Repo) {}
+  constructor(public repo: Repo) {}
   policies: Policy[] = []
   use = (...plugins: RepolicyPlugin[]) => {
     plugins.forEach((plugin) => {
@@ -23,9 +23,9 @@ export class RepolicyContext {
   run = async () => {
     for (const policy of this.policies) {
       if (policy.f) {
-        const oldVersion = this.project.version
-        await policy.f(this.project)
-        if (oldVersion !== this.project.version) {
+        const oldVersion = this.repo.version
+        await policy.f(this.repo)
+        if (oldVersion !== this.repo.version) {
           console.log(`[${chalk.yellow('update')}] ${policy.name}`)
         } else {
           console.log(`[${chalk.green('ok')}] ${policy.name}`)
@@ -34,6 +34,9 @@ export class RepolicyContext {
         console.log(`[${chalk.magenta('todo')}] ${policy.name}`)
       }
     }
+  }
+  flush = async () => {
+    this.repo.flush()
   }
 }
 

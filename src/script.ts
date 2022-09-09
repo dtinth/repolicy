@@ -6,6 +6,7 @@ import { resolve } from 'path'
 import { JSONEditor } from './JSONEditor'
 import * as _ from 'lodash-es'
 import { PropertyPath } from 'lodash'
+import { isExecutable } from './isExecutable'
 
 export type RepolicyScript = (context: RepolicyContext) => void
 
@@ -95,6 +96,7 @@ function managedFiles(templatePath: string): RepolicyPlugin {
     for (const file of files) {
       context.addPolicy(`Managed file "${file}"`, async (repo) => {
         repo.write(file, readFileSync(resolve(templatePath, file)))
+        repo.setExecutableFlag(file, isExecutable(resolve(templatePath, file)))
       })
     }
   }
