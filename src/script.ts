@@ -123,13 +123,21 @@ function packageDevDependencies(
     for (const [name, version] of Object.entries(data)) {
       if (version === null) {
         context.addPolicy(`Unwanted devDependency "${name}"`, async (repo) => {
-          _updatePackageJson(repo, ['devDependencies', name], () => undefined)
+          await _updatePackageJson(
+            repo,
+            ['devDependencies', name],
+            () => undefined,
+          )
         })
       } else {
         context.addPolicy(
           `DevDependency "${name}" version "${version}"`,
           async (repo) => {
-            _updatePackageJson(repo, ['devDependencies', name], () => version)
+            await _updatePackageJson(
+              repo,
+              ['devDependencies', name],
+              () => version,
+            )
           },
         )
       }
@@ -144,11 +152,11 @@ function packageScripts(data: Record<string, string | null>): RepolicyPlugin {
     for (const [name, value] of Object.entries(data)) {
       if (value === null) {
         context.addPolicy(`Unwanted script "${name}"`, async (repo) => {
-          _updatePackageJson(repo, ['scripts', name], () => undefined)
+          await _updatePackageJson(repo, ['scripts', name], () => undefined)
         })
       } else {
         context.addPolicy(`Managed package script "${name}"`, async (repo) => {
-          _updatePackageJson(repo, ['scripts', name], () => value)
+          await _updatePackageJson(repo, ['scripts', name], () => value)
         })
       }
     }
@@ -164,11 +172,11 @@ function packageJsonPolicy(
 ): RepolicyPlugin {
   return (context) => {
     context.addPolicy(policyName, async (repo) => {
-      _updatePackageJson(repo, field, expected)
+      await _updatePackageJson(repo, field, expected)
     })
   }
 }
-function _updatePackageJson(
+async function _updatePackageJson(
   repo: Repo,
   field: PropertyPath,
   expected: (value: any, p: any) => any,
@@ -176,7 +184,7 @@ function _updatePackageJson(
   const editor = new JSONEditor(repo)
   const pkg = editor.read('package.json')
   const value = _.get(pkg, field)
-  const expectedValue = expected(value, pkg)
+  const expectedValue = await expected(value, pkg)
   editor.edit('package.json', (p) => {
     if (expectedValue === undefined) {
       _.unset(p, field)
