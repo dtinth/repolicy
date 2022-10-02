@@ -1,6 +1,6 @@
 # repolicy
 
-Tools for automatically maintaining multi-repo JavaScript projects.
+Tools for automatically maintaining multi-repo JavaScript projects that is following a [golden path](https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/).
 
 Planned features:
 
