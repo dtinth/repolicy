@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - changeset-publish
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
