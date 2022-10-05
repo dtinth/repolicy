@@ -107,7 +107,7 @@ export class RunAllCommandLineAction extends CommandLineAction {
       await ctx.run()
       if (enforce) {
         await ctx.flush()
-        await execa('set -ex; pnpm install', {
+        await execa('set -ex; pnpm install --no-frozen-lockfile', {
           shell: true,
           stdio: 'inherit',
           cwd: repoPath,
