@@ -111,6 +111,7 @@ export class RunAllCommandLineAction extends CommandLineAction {
           shell: true,
           stdio: 'inherit',
           cwd: repoPath,
+          reject: false,
         })
         const prBody = [
           `This PR applies the following policies:`,
