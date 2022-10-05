@@ -66,7 +66,7 @@ export const script: RepolicyScript = async ({ use }) => {
       '@rushstack/heft-web-rig': '0.10.15',
       '@types/heft-jest': '1.0.3',
       prettier: '2.7.1',
-      '@changesets/cli': '2.23.0',
+      '@changesets/cli': '2.25.0',
       jest: null,
       mocha: null,
       chai: null,

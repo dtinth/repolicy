@@ -35,7 +35,8 @@ class RunCommandLineAction extends CommandLineAction {
       parameterLongName: '--repo',
       parameterShortName: '-r',
       argumentName: 'REPO',
-      description: 'The repository to check.',
+      description: 'Path to the repository to check.',
+      required: true,
     })
     this._enforce = this.defineFlagParameter({
       parameterLongName: '--enforce',
