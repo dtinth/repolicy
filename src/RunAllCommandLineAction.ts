@@ -6,10 +6,11 @@ import {
 import { RepolicyContext } from './RepolicyContext'
 import { Repo } from './Repo'
 import { script } from './script'
-import { existsSync, mkdirSync, readFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { load } from 'js-yaml'
 import { z } from 'zod'
 import { execa } from 'execa'
+import { Octokit } from 'octokit'
 
 const yamlSchema = z.object({
   repos: z.array(
@@ -90,13 +91,15 @@ export class RunAllCommandLineAction extends CommandLineAction {
         ok: 0,
         update: 0,
       }
-      const ctx = new RepolicyContext(new Repo(listFilePath), {
-        onPolicyEvaluated(_policy, status) {
+      const updates: string[] = []
+      const ctx = new RepolicyContext(new Repo(repoPath), {
+        onPolicyEvaluated(policy, status) {
           stats.total++
           if (status === 'ok') {
             stats.ok++
           } else if (status === 'update') {
             stats.update++
+            updates.push(policy.name)
           }
         },
       })
@@ -104,6 +107,55 @@ export class RunAllCommandLineAction extends CommandLineAction {
       await ctx.run()
       if (enforce) {
         await ctx.flush()
+        const prBody = [
+          `This PR applies the following policies:`,
+          ``,
+          ...updates.map((u) => `- ${u}`),
+        ].join('\n')
+        const result = await execa(
+          'set -ex; git add -A && git commit -m "Apply repository policies" && git push origin HEAD:refs/heads/repolicy -f',
+          {
+            shell: true,
+            stdio: 'inherit',
+            cwd: repoPath,
+            env: {
+              GIT_COMMITTER_NAME: 'dtinth-bot',
+              GIT_AUTHOR_NAME: 'dtinth-bot',
+              GIT_COMMITTER_EMAIL: 'dtinth-bot@users.noreply.github.com',
+              GIT_AUTHOR_EMAIL: 'dtinth-bot@users.noreply.github.com',
+            },
+            reject: false,
+          },
+        )
+        if (result.exitCode === 0) {
+          const octokit = new Octokit({ auth: process.env.GH_PUSH_TOKEN })
+          // Check if there is already a PR
+          const { data: prs } = await octokit.rest.pulls.list({
+            owner,
+            repo,
+            head: 'repolicy',
+          })
+          if (prs.length === 0) {
+            const { data: pr } = await octokit.rest.pulls.create({
+              owner,
+              repo,
+              title: 'Apply repository policies',
+              head: 'repolicy',
+              base: 'main',
+              body: prBody,
+            })
+            console.log(`Created PR: ${pr.html_url}`)
+          } else {
+            const { data: pr } = await octokit.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: prs[0].number,
+              title: 'Apply repository policies',
+              body: prBody,
+            })
+            console.log(`Updated PR: ${pr.html_url}`)
+          }
+        }
       }
       results.push({
         repo: `${owner}/${repo}`,
