@@ -13,20 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Setup pnpm
-        uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d # v2.2.2
-        with:
-          version: 7.13.1
       - name: Obtain a GitHub App Installation Access Token
         id: githubAppAuth
         run: |
           TOKEN="$(npx obtain-github-app-installation-access-token ci ${{ secrets.GH_APP_CREDENTIALS_TOKEN }})"
           echo "::add-mask::$TOKEN"
           echo "::set-output name=token::$TOKEN"
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: yarn
+      - name: Setup pnpm
+        uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d # v2.2.2
+        with:
+          version: 7.13.1
       - run: yarn
       - run: yarn repolicy run-all -f projects.yml ${{ inputs.enforce && '--enforce' || '' }}
         env:
