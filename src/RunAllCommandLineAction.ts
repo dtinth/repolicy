@@ -107,6 +107,11 @@ export class RunAllCommandLineAction extends CommandLineAction {
       await ctx.run()
       if (enforce) {
         await ctx.flush()
+        await execa('set -ex; pnpm install', {
+          shell: true,
+          stdio: 'inherit',
+          cwd: repoPath,
+        })
         const prBody = [
           `This PR applies the following policies:`,
           ``,
