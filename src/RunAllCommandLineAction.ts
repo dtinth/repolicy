@@ -74,7 +74,13 @@ export class RunAllCommandLineAction extends CommandLineAction {
       mkdirSync(`.data/repos/${owner}`, { recursive: true })
       const repoPath = `.data/repos/${owner}/${repo}`
       if (!existsSync(repoPath)) {
-        await execa(`git clone '${url}' '${repoPath}'`, {
+        const repoUrl = process.env.GH_PUSH_TOKEN
+          ? url.replace(
+              '://',
+              `://x-access-token:${process.env.GH_PUSH_TOKEN}@`,
+            )
+          : url
+        await execa(`git clone '${repoUrl}' '${repoPath}'`, {
           shell: true,
           stdio: 'inherit',
         })
