@@ -22,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          cache: yarn
       - run: yarn
       - run: yarn repolicy run-all -f projects.yml
         env:
