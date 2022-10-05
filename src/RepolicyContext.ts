@@ -9,8 +9,14 @@ class Policy {
 }
 type PolicyFunction = (repo: Repo) => Promise<void>
 
+export type PolicyEvaluationStatus = 'ok' | 'update' | 'todo'
+
+export interface Reporter {
+  onPolicyEvaluated?(policy: Policy, status: PolicyEvaluationStatus): void
+}
+
 export class RepolicyContext {
-  constructor(public repo: Repo) {}
+  constructor(public repo: Repo, public reporter?: Reporter) {}
   policies: Policy[] = []
   use = (...plugins: RepolicyPlugin[]) => {
     plugins.forEach((plugin) => {
@@ -27,11 +33,14 @@ export class RepolicyContext {
         await policy.f(this.repo)
         if (oldVersion !== this.repo.version) {
           console.log(`[${chalk.yellow('update')}] ${policy.name}`)
+          this.reporter?.onPolicyEvaluated?.(policy, 'update')
         } else {
           console.log(`[${chalk.green('ok')}] ${policy.name}`)
+          this.reporter?.onPolicyEvaluated?.(policy, 'ok')
         }
       } else {
         console.log(`[${chalk.magenta('todo')}] ${policy.name}`)
+        this.reporter?.onPolicyEvaluated?.(policy, 'todo')
       }
     }
   }

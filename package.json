@@ -4,12 +4,14 @@
     "@rushstack/ts-command-line": "^4.12.4",
     "@types/node": "^18.7.14",
     "chalk": "^5.0.1",
+    "execa": "^6.1.0",
     "git-remote-origin-url": "^4.0.0",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "tsx": "^3.9.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.2",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
