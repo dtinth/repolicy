@@ -1,0 +1,28 @@
+name: Repolicy
+on:
+  workflow_dispatch:
+    inputs:
+      enforce:
+        description: 'Enforce'
+        type: boolean
+        default: false
+        required: false
+jobs:
+  build:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Obtain a GitHub App Installation Access Token
+        id: githubAppAuth
+        run: |
+          TOKEN="$(npx obtain-github-app-installation-access-token ci ${{ secrets.GH_APP_CREDENTIALS_TOKEN }})"
+          echo "::add-mask::$TOKEN"
+          echo "::set-output name=token::$TOKEN"
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: yarn
+      - run: yarn repolicy run-all projects.yml
+        env:
+          GH_PUSH_TOKEN: ${{ steps.githubAppAuth.outputs.token }}
