@@ -24,6 +24,6 @@ jobs:
           node-version: 16.x
           cache: yarn
       - run: yarn
-      - run: yarn repolicy run-all -f projects.yml
+      - run: yarn repolicy run-all -f projects.yml ${{ inputs.enforce && '--enforce' || '' }}
         env:
           GH_PUSH_TOKEN: ${{ steps.githubAppAuth.outputs.token }}
