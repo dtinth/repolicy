@@ -20,6 +20,7 @@
     "@types/lodash-es": "^4.17.6"
   },
   "scripts": {
-    "repolicy": "tsx src/main.ts"
+    "repolicy": "tsx src/main.ts",
+    "test": "tsx test.ts"
   }
 }

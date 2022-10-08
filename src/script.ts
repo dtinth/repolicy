@@ -2,7 +2,7 @@ import glob from 'glob'
 import { RepolicyPlugin, RepolicyContext } from './RepolicyContext'
 import { Repo } from './Repo'
 import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { basename, resolve } from 'path'
 import { JSONEditor } from './JSONEditor'
 import * as _ from 'lodash-es'
 import { PropertyPath } from 'lodash'
@@ -10,7 +10,7 @@ import { isExecutable } from './isExecutable'
 
 export type RepolicyScript = (context: RepolicyContext) => Promise<void>
 
-export const script: RepolicyScript = async ({ use }) => {
+export const script: RepolicyScript = async ({ use, repo }) => {
   use(managedFiles('skeleton'))
   use(
     unwantedFile(
@@ -26,9 +26,18 @@ export const script: RepolicyScript = async ({ use }) => {
       'yarn.lock',
     ),
   )
+  use(defaultFile('src/index.ts', 'export {}\n'))
+
+  const guessName = () => {
+    return basename(repo.basePath)
+  }
 
   use(
-    packageJsonPolicy('Package has a name', 'name', (name) => name || '!?'),
+    packageJsonPolicy(
+      'Package has a name',
+      'name',
+      (name) => name || guessName(),
+    ),
     packageJsonPolicy('Package has a version', 'version', (v) => v || '0.0.0'),
     packageJsonPolicy('Package has files', 'files', () => [
       'src',
@@ -86,7 +95,10 @@ export const script: RepolicyScript = async ({ use }) => {
       api: './scripts/generate-api-docs',
     }),
   )
+
+  use(defaultTsconfig())
 }
+
 /**
  * Ensure that manage files exist.
  */
@@ -101,6 +113,7 @@ function managedFiles(templatePath: string): RepolicyPlugin {
     }
   }
 }
+
 /**
  * Ensure that a file does not exist.
  */
@@ -113,6 +126,20 @@ function unwantedFile(...projectPaths: string[]): RepolicyPlugin {
     }
   }
 }
+
+/**
+ * Ensure that a file does not exist.
+ */
+function defaultFile(projectPath: string, contents: string): RepolicyPlugin {
+  return (context) => {
+    context.addPolicy(`Default file "${projectPath}"`, async (repo) => {
+      if (!repo.exists(projectPath)) {
+        repo.write(projectPath, Buffer.from(contents))
+      }
+    })
+  }
+}
+
 /**
  * Ensure that a file does not exist.
  */
@@ -195,4 +222,20 @@ async function _updatePackageJson(
 }
 function unscopedPackageName(p: any) {
   return (p.name || '').split('/').pop()
+}
+
+function defaultTsconfig(): RepolicyPlugin {
+  return (context) => {
+    context.addPolicy('Default tsconfig.json', async (repo) => {
+      const editor = new JSONEditor(repo)
+      editor.edit('tsconfig.json', (tsconfig) => {
+        tsconfig.extends = './tsconfig-base.json'
+        _.set(
+          tsconfig,
+          ['compilerOptions', 'types'],
+          [..._.get(tsconfig, ['compilerOptions', 'types'], []), 'heft-jest'],
+        )
+      })
+    })
+  }
 }

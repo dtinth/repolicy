@@ -2,12 +2,13 @@ import chalk from 'chalk'
 import {
   chmodSync,
   existsSync,
+  mkdirSync,
   readFileSync,
   statSync,
   unlinkSync,
   writeFileSync,
 } from 'fs'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
 import { isExecutable } from './isExecutable'
 
 export class Repo {
@@ -68,6 +69,7 @@ export class Repo {
             console.log(`[${chalk.cyan('update')}] ${path}`)
           }
         } else {
+          mkdirSync(dirname(fullPath), { recursive: true })
           writeFileSync(fullPath, entry.contents)
           console.log(`[${chalk.cyan('add')}] ${path}`)
         }
