@@ -233,7 +233,7 @@ function defaultTsconfig(): RepolicyPlugin {
         _.set(
           tsconfig,
           ['compilerOptions', 'types'],
-          [..._.get(tsconfig, ['compilerOptions', 'types'], []), 'heft-jest'],
+          _.uniq([..._.get(tsconfig, ['compilerOptions', 'types'], []), 'heft-jest']),
         )
       })
     })
