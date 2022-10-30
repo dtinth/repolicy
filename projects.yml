@@ -5,6 +5,7 @@ repos:
   - repo: https://github.com/dtinth/create-type-helper
   - repo: https://github.com/dtinth/google-sign-in-controller
   - repo: https://github.com/dtinth/init-middleware
+  - repo: https://github.com/dtinth/minitracer
   - repo: https://github.com/dtinth/react-performance-coach
   - repo: https://github.com/dtinth/ride
   - repo: https://github.com/dtinth/seald
