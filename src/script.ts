@@ -70,9 +70,36 @@ export const script: RepolicyScript = async ({ use, repo }) => {
       'typings',
       () => undefined,
     ),
+    packageJsonPolicy(
+      'Package has a repository field',
+      'repository',
+      (value, _pkg, repo) => {
+        const gitHubRepo = _getGitHubRepo(repo)
+        if (!gitHubRepo) return value
+        return { type: 'git', url: `git+https://github.com/${gitHubRepo}.git` }
+      },
+    ),
+    packageJsonPolicy(
+      'Package has a homepage field',
+      'homepage',
+      (value, _pkg, repo) => {
+        const gitHubRepo = _getGitHubRepo(repo)
+        if (!gitHubRepo) return value
+        return `https://github.com/${gitHubRepo}#readme`
+      },
+    ),
+    packageJsonPolicy(
+      'Package has a bugs field',
+      'bugs',
+      (value, _pkg, repo) => {
+        const gitHubRepo = _getGitHubRepo(repo)
+        if (!gitHubRepo) return value
+        return { url: `https://github.com/${gitHubRepo}/issues` }
+      },
+    ),
     packageDevDependencies({
-      '@rushstack/heft': '0.45.12',
-      '@rushstack/heft-web-rig': '0.10.15',
+      '@rushstack/heft': '0.48.7',
+      '@rushstack/heft-web-rig': '0.12.10',
       '@types/heft-jest': '1.0.3',
       prettier: '2.7.1',
       '@changesets/cli': '2.25.0',
@@ -195,7 +222,7 @@ function packageScripts(data: Record<string, string | null>): RepolicyPlugin {
 function packageJsonPolicy(
   policyName: string,
   field: PropertyPath,
-  expected: (value: any, p: any) => any,
+  expected: (value: any, pkg: any, repo: Repo) => any,
 ): RepolicyPlugin {
   return (context) => {
     context.addPolicy(policyName, async (repo) => {
@@ -206,12 +233,12 @@ function packageJsonPolicy(
 async function _updatePackageJson(
   repo: Repo,
   field: PropertyPath,
-  expected: (value: any, p: any) => any,
+  expected: (value: any, pkg: any, repo: Repo) => any,
 ) {
   const editor = new JSONEditor(repo)
   const pkg = editor.read('package.json')
   const value = _.get(pkg, field)
-  const expectedValue = await expected(value, pkg)
+  const expectedValue = await expected(value, pkg, repo)
   editor.edit('package.json', (p) => {
     if (expectedValue === undefined) {
       _.unset(p, field)
@@ -233,9 +260,22 @@ function defaultTsconfig(): RepolicyPlugin {
         _.set(
           tsconfig,
           ['compilerOptions', 'types'],
-          _.uniq([..._.get(tsconfig, ['compilerOptions', 'types'], []), 'heft-jest']),
+          _.uniq([
+            ..._.get(tsconfig, ['compilerOptions', 'types'], []),
+            'heft-jest',
+          ]),
         )
       })
     })
   }
+}
+
+function _getGitHubRepo(repo: Repo) {
+  const config = repo.read('.git/config')
+  if (!config) return undefined
+  const url = config.toString().match(/url = (.*)/)?.[1]
+  if (!url) return undefined
+  const gitHubRepo = url.match(/github.com[:/]([^/]+\/[^/]+)/)?.[1]
+  if (!gitHubRepo) return undefined
+  return gitHubRepo.replace(/\.git$/, '')
 }

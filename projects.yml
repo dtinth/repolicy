@@ -3,10 +3,16 @@ repos:
   - repo: https://github.com/dtinth/bsearch
   - repo: https://github.com/dtinth/chain
   - repo: https://github.com/dtinth/create-type-helper
-  - repo: https://github.com/dtinth/google-sign-in-controller
+  - repo: https://github.com/dtinth/google-application-credentials-base64
+  - repo: https://github.com/dtinth/google-offline-access
+  # - repo: https://github.com/dtinth/google-sign-in-controller
   - repo: https://github.com/dtinth/init-middleware
+  - repo: https://github.com/dtinth/is-axios-error
   - repo: https://github.com/dtinth/minitracer
+  - repo: https://github.com/dtinth/query-flags
+  - repo: https://github.com/dtinth/react-iconify-icon-wrapper
   - repo: https://github.com/dtinth/react-performance-coach
+  - repo: https://github.com/dtinth/retry-until-timeout
   - repo: https://github.com/dtinth/ride
   - repo: https://github.com/dtinth/seald
   - repo: https://github.com/dtinth/stack-local-storage
