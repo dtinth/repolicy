@@ -1,4 +1,5 @@
 name: Repolicy
+run-name: ${{ inputs.enforce && 'Enforce' || 'Check' }} repository policies
 on:
   workflow_dispatch:
     inputs:
