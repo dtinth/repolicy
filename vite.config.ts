@@ -1,11 +1,20 @@
-import tsdownConfig from './tsdown.config.js';
-
-import { defineConfig } from 'vite-plus';
+import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   staged: {
-    "*": "vp check --fix"
+    "*": "vp check --fix",
   },
-  pack: tsdownConfig,
-  lint: {"options":{"typeAware":true,"typeCheck":true}},
+  pack: {
+    dts: {
+      tsgo: true,
+    },
+    exports: true,
+  },
+  lint: {
+    options: {
+      typeAware: true,
+      typeCheck: true,
+    },
+  },
+  fmt: {},
 });

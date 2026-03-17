@@ -1,23 +1,23 @@
-# tsdown-starter
+# vite-plus-starter
 
-A starter for creating a TypeScript package.
+A starter for creating a Vite Plus project.
 
 ## Development
 
 - Install dependencies:
 
 ```bash
-npm install
+vp install
 ```
 
 - Run the unit tests:
 
 ```bash
-npm run test
+vp test
 ```
 
 - Build the library:
 
 ```bash
-npm run build
+vp pack
 ```
