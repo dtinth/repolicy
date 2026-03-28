@@ -1,23 +1,26 @@
 {
-  "name": "fresh-app",
+  "name": "repolicy",
   "version": "0.0.0",
-  "description": "A starter for creating a TypeScript package.",
-  "homepage": "https://github.com/author/library#readme",
+  "description": "Automatically maintain repository",
+  "homepage": "https://github.com/dtinth/repolicy#readme",
   "bugs": {
-    "url": "https://github.com/author/library/issues"
+    "url": "https://github.com/dtinth/repolicy/issues"
   },
   "license": "MIT",
-  "author": "Author Name <author.name@mail.com>",
+  "author": "dtinth <dtinth@spacet.me>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/author/library.git"
+    "url": "git+https://github.com/dtinth/repolicy.git"
+  },
+  "bin": {
+    "repolicy": "./dist/cli.mjs"
   },
   "files": [
     "dist"
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": "./dist/cli.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -30,6 +33,9 @@
     "check": "vp check",
     "prepublishOnly": "vp run build",
     "prepare": "vp config"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
