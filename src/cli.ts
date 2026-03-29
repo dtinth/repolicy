@@ -3,7 +3,7 @@
 import { Command } from "commander";
 import { checkAll, fixAll } from "./runner.js";
 import { policies } from "./policies.js";
-import type { Violation } from "./types.js";
+import type { Policy, Violation } from "./types.js";
 
 const repoPath = process.cwd();
 
@@ -25,7 +25,20 @@ program
   .option("-v, --verbose", "Show full violation details")
   .option("--json", "Output as JSON")
   .action(async (opts) => {
-    const violations = await checkAll(policies, repoPath);
+    const onPolicy = opts.verbose
+      ? (policy: Policy, violations: Violation[]) => {
+          if (violations.length === 0) {
+            console.log(`  ✓ ${policy.name}`);
+          } else {
+            for (const v of violations) {
+              const fix = v.fix ? ` → ${v.fix.description}` : "";
+              console.log(`  ✗ ${policy.name}: ${v.message}${fix}`);
+            }
+          }
+        }
+      : undefined;
+
+    const violations = await checkAll(policies, repoPath, onPolicy);
 
     if (opts.json) {
       console.log(
@@ -43,6 +56,11 @@ program
       process.exit(violations.length > 0 ? 1 : 0);
     }
 
+    if (opts.verbose) {
+      if (violations.length > 0) process.exit(1);
+      return;
+    }
+
     if (violations.length === 0) {
       console.log("All policies pass.");
       return;
@@ -50,7 +68,7 @@ program
 
     console.log(`${violations.length} violation(s) found:\n`);
     for (const v of violations) {
-      console.log(formatViolation(v, opts.verbose));
+      console.log(formatViolation(v, false));
     }
     process.exit(1);
   });

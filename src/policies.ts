@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { globby } from "globby";
 import { join } from "path";
 import type { Policy } from "./types.js";
 
@@ -144,4 +145,106 @@ const packageJson: Policy = {
   },
 };
 
-export const policies: Policy[] = [packageJson];
+function unwantedDevDep(name: string): Policy {
+  return {
+    name: `devDependencies > no ${name}`,
+    async check({ repoPath, report }) {
+      const filePath = join(repoPath, "package.json");
+      if (!existsSync(filePath)) return;
+      const pkg = readJson(filePath);
+      if (pkg.devDependencies?.[name] !== undefined) {
+        report(`${name} should not be a devDependency`, {
+          description: `Remove ${name} from devDependencies`,
+          async execute() {
+            delete pkg.devDependencies[name];
+            writeJson(filePath, pkg);
+          },
+        });
+      }
+    },
+  };
+}
+
+function unwantedFile(relativePath: string): Policy {
+  return {
+    name: `no ${relativePath}`,
+    async check({ repoPath, report }) {
+      const filePath = join(repoPath, relativePath);
+      if (existsSync(filePath)) {
+        report(`${relativePath} should not exist`, {
+          description: `Delete ${relativePath}`,
+          async execute() {
+            rmSync(filePath, { recursive: true });
+          },
+        });
+      }
+    },
+  };
+}
+
+export const policies: Policy[] = [
+  packageJson,
+  // Old Rush Stack tooling
+  unwantedDevDep("@rushstack/heft"),
+  unwantedDevDep("@rushstack/heft-web-rig"),
+  unwantedDevDep("@types/heft-jest"),
+  // Old test frameworks (replaced by vitest via vite-plus)
+  unwantedDevDep("jest"),
+  unwantedDevDep("@types/jest"),
+  unwantedDevDep("mocha"),
+  unwantedDevDep("chai"),
+  // Old release tooling (replaced by changesets)
+  unwantedDevDep("bumpp"),
+  unwantedDevDep("release-it"),
+  // Old formatting (replaced by oxfmt via vite-plus)
+  unwantedDevDep("prettier"),
+  // Old doc tooling
+  unwantedDevDep("@microsoft/api-documenter"),
+  unwantedDevDep("api-documenter-yaml-to-antora-asciidoc"),
+  unwantedDevDep("news-fragments"),
+  unwantedDevDep("@spacet.me/news-fragments"),
+  // Standalone typescript (provided by vite-plus)
+  unwantedDevDep("typescript"),
+  // Linting (replaced by oxlint via vite-plus)
+  unwantedDevDep("eslint"),
+  unwantedDevDep("@eslint/eslintrc"),
+  unwantedDevDep("@eslint/js"),
+  unwantedDevDep("eslint-config-prettier"),
+  // Testing (use vite-plus/test instead)
+  unwantedDevDep("vitest"),
+  // Bundling (bundled in vite-plus)
+  unwantedDevDep("tsdown"),
+  unwantedDevDep("vite"),
+  // Yarn leftovers (migrated to pnpm)
+  unwantedFile("yarn.lock"),
+  unwantedFile(".yarnrc"),
+  unwantedFile(".yarnrc.yml"),
+  unwantedFile(".yarn"),
+  // Prettier (replaced by oxfmt via vite-plus)
+  unwantedFile(".prettierrc"),
+  unwantedFile(".prettierrc.yml"),
+  unwantedFile(".prettierrc.js"),
+  unwantedFile(".prettierignore"),
+  // Rush Stack config files
+  unwantedFile("tsconfig-base.json"),
+  unwantedFile("config/rig.json"),
+  unwantedFile("config/jest.config.json"),
+  unwantedFile("config/api-extractor.json"),
+  // API extractor output
+  {
+    name: "no etc/*.api.md",
+    async check({ repoPath, report }) {
+      const apiMdFiles = await globby("etc/*.api.md", { cwd: repoPath });
+      for (const file of apiMdFiles) {
+        report(`${file} should not exist`, {
+          description: `Delete ${file} and etc/README.md`,
+          async execute() {
+            rmSync(join(repoPath, file));
+            const readme = join(repoPath, "etc/README.md");
+            if (existsSync(readme)) rmSync(readme);
+          },
+        });
+      }
+    },
+  },
+];

@@ -1,25 +1,33 @@
 import type { Policy, Violation } from "./types.js";
 
-export async function checkAll(policies: Policy[], repoPath: string): Promise<Violation[]> {
-  const violations: Violation[] = [];
+export async function checkAll(
+  policies: Policy[],
+  repoPath: string,
+  onPolicy?: (policy: Policy, violations: Violation[]) => void,
+): Promise<Violation[]> {
+  const allViolations: Violation[] = [];
   const queue = [...policies];
   let i = 0;
   while (i < queue.length) {
     const policy = queue[i];
     const children: Policy[] = [];
+    const policyViolations: Violation[] = [];
     await policy.check({
       repoPath,
       report(message, fix) {
-        violations.push({ policy, message, fix });
+        const v: Violation = { policy, message, fix };
+        policyViolations.push(v);
+        allViolations.push(v);
       },
       queue(child) {
         children.push(child);
       },
     });
+    onPolicy?.(policy, policyViolations);
     queue.splice(i + 1, 0, ...children);
     i++;
   }
-  return violations;
+  return allViolations;
 }
 
 export interface FixResult {
