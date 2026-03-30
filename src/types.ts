@@ -1,13 +1,13 @@
 export interface Fix {
   description: string;
-  execute: () => Promise<void>;
+  execute?: () => Promise<void>;
 }
 
 export interface PolicyContext {
   /** Absolute path to the repository root */
   repoPath: string;
-  /** Report a violation. Optionally provide a Fix to enable auto-remediation. */
-  report(this: void, message: string, fix?: Fix): void;
+  /** Report a violation. Optionally provide a Fix for auto-remediation or a string for manual fix instructions. */
+  report(this: void, message: string, fix?: Fix | string): void;
   /** Queue a child policy to run immediately after this policy (depth-first). */
   queue(this: void, policy: Policy): void;
 }

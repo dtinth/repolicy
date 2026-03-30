@@ -15,7 +15,9 @@ export async function checkAll(
     await policy.check({
       repoPath,
       report(message, fix) {
-        const v: Violation = { policy, message, fix };
+        // Convert string to manual Fix object
+        const fixObj = typeof fix === "string" ? { description: fix } : fix;
+        const v: Violation = { policy, message, fix: fixObj };
         policyViolations.push(v);
         allViolations.push(v);
       },
@@ -50,15 +52,15 @@ export async function fixAll(
     const violations = await checkAll(policies, repoPath);
     onIteration?.(violations);
 
-    const fixable = violations.filter((v) => v.fix);
-    const unfixable = violations.filter((v) => !v.fix);
+    const autoFixable = violations.filter((v) => v.fix?.execute);
+    const remaining = violations.filter((v) => !v.fix?.execute);
 
-    if (fixable.length === 0) {
-      return { fixed: [], remaining: unfixable };
+    if (autoFixable.length === 0) {
+      return { fixed: [], remaining };
     }
 
-    const target = fixable[0];
-    await target.fix!.execute();
+    const target = autoFixable[0];
+    await target.fix!.execute!();
 
     // Re-check to verify stability
     const after = await checkAll(policies, repoPath);

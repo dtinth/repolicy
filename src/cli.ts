@@ -8,11 +8,16 @@ import type { Policy, Violation } from "./types.js";
 const repoPath = process.cwd();
 
 function formatViolation(v: Violation, verbose: boolean): string {
-  const fixable = v.fix ? " [fixable]" : "";
+  const isAutoFixable = v.fix?.execute !== undefined;
+  const hasManualFix = v.fix?.description !== undefined && !isAutoFixable;
+  let badge = "";
+  if (isAutoFixable) badge = " [fixable]";
+  else if (hasManualFix) badge = " [manual fix]";
+
   if (verbose && v.fix) {
-    return `  ${v.policy.name}: ${v.message}\n    fix: ${v.fix.description}`;
+    return `  ${v.policy.name}: ${v.message}\n    ${isAutoFixable ? "fix" : "manual fix"}: ${v.fix.description}`;
   }
-  return `  ${v.policy.name}: ${v.message}${fixable}`;
+  return `  ${v.policy.name}: ${v.message}${badge}`;
 }
 
 const program = new Command();
@@ -81,11 +86,11 @@ program
     let totalFixed = 0;
 
     const result = await fixAll(policies, repoPath, (violations) => {
-      const fixable = violations.filter((v) => v.fix);
-      if (fixable.length > 0 && opts.verbose) {
-        console.log(`Applying fix: ${fixable[0].fix!.description}`);
+      const autoFixable = violations.filter((v) => v.fix?.execute);
+      if (autoFixable.length > 0 && opts.verbose) {
+        console.log(`Applying fix: ${autoFixable[0].fix!.description}`);
       }
-      totalFixed += fixable.length > 0 ? 1 : 0;
+      totalFixed += autoFixable.length > 0 ? 1 : 0;
     });
 
     if (result.stabilityError) {
