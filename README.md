@@ -1,6 +1,6 @@
 # repolicy
 
-Tools for automatically maintaining Vite+ projects that follow a [golden path](https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/). Repolicy enforces standardized `package.json` fields, configuration files, and GitHub Actions workflows across repositories.
+Tools for automatically maintaining open source TypeScript libraries published to npm that follow a [golden path](https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/). Repolicy enforces standardized `package.json` fields, configuration files, and GitHub Actions workflows across repositories.
 
 ## Features
 
@@ -37,6 +37,7 @@ Example policies:
 - Trusted publishing with OIDC — no long-lived npm tokens required
 - Consistent `tsconfig.json`, `vite.config.ts`, and GitHub Actions workflows across all projects
 - Ability to extend base configurations while staying in compliance
+- npm packages that include source code and source maps, allowing offline inspection by coding agents and enabling documentation generation via tools like [apiref](https://github.com/dtinth/apiref)
 
 ## Installation
 
