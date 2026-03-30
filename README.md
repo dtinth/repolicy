@@ -34,7 +34,7 @@ Example policies:
 - `vp run test` to run tests
 - `vp run check` to format files and lint code
 - Releases managed by [Changesets](https://changesets-docs.vercel.app/), automated by GitHub Actions
-- Trusted publishing with OIDC — no long-lived npm tokens required
+- [Trusted publishing](https://docs.npmjs.com/trusted-publishers) with OIDC — no long-lived npm tokens required
 - Consistent `tsconfig.json`, `vite.config.ts`, and GitHub Actions workflows across all projects
 - Ability to extend base configurations while staying in compliance
 - npm packages that include source code and source maps, allowing offline inspection by coding agents and enabling documentation generation via tools like [apiref](https://github.com/dtinth/apiref)
