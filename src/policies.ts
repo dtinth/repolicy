@@ -1,3 +1,7 @@
+// INSTRUCTION FOR CODING AGENTS: Keep this file in sync with README.md
+// When modifying policies, update the corresponding documentation in README.md
+// The "Policies Enforced" section in README.md should reflect the policies defined here
+
 import { execSync } from "child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { globby } from "globby";

@@ -1,3 +1,10 @@
+<!--
+INSTRUCTION FOR CODING AGENTS: Keep this README file updated as the project evolves.
+When adding new policies, features, or changing tool versions, update the corresponding sections.
+The Policies Enforced section should always reflect the actual policies defined in src/policies.ts.
+The What to Expect section should always reflect the project's capabilities and goals.
+-->
+
 # repolicy
 
 Tools for automatically maintaining open source TypeScript libraries published to npm that follow a [golden path](https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/). Repolicy enforces standardized `package.json` fields, configuration files, and GitHub Actions workflows across repositories.
