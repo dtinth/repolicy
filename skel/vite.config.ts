@@ -10,6 +10,9 @@ export default defineConfig({
     unbundle: true,
     sourcemap: true,
   },
+  test: {
+    include: ["src/**/*.test.ts"],
+  },
   lint: {
     options: {
       typeAware: true,
